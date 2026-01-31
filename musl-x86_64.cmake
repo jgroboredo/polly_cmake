@@ -1,0 +1,35 @@
+# Usage:
+# MUSL_TOOLCHAIN_PREFIX=/opt/x86_64-musl cmake ...
+# or relative paths should also work
+# 
+# Expecting toolchain built from crosstool-ng
+
+
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
+
+if(DEFINED ENV{MUSL_TOOLCHAIN_PREFIX})
+    set(TOOLCHAIN_PREFIX_RAW $ENV{MUSL_TOOLCHAIN_PREFIX})
+    get_filename_component(TOOLCHAIN_PREFIX ${TOOLCHAIN_PREFIX_RAW} ABSOLUTE)
+else()
+    message(FATAL_ERROR "MUSL_TOOLCHAIN_PREFIX environment variable not set")
+endif()set(TOOLCHAIN_TARGET x86_64-multilib-linux-musl)
+
+# Compiler and tools
+set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}/bin/${TOOLCHAIN_TARGET}-gcc)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}/bin/${TOOLCHAIN_TARGET}-g++)
+set(CMAKE_AR ${TOOLCHAIN_PREFIX}/bin/${TOOLCHAIN_TARGET}-ar)
+set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}/bin/${TOOLCHAIN_TARGET}-ranlib)
+
+# Sysroot
+set(CMAKE_SYSROOT ${TOOLCHAIN_PREFIX}/${TOOLCHAIN_TARGET}/sysroot)
+set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
+
+# Search behavior
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# Static linking flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static" CACHE STRING "" FORCE)
